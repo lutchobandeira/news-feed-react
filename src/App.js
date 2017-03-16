@@ -15,9 +15,18 @@ class Feed extends Component {
   render() {
     return (
       <div className="feed">
-        <div className="post">
-          <span>This is my first post!</span>
-        </div>
+        <Post content="This is my first post!" />
+        <Post content="This is my second post!" />
+      </div>
+    )
+  }
+}
+
+class Post extends Component {
+  render() {
+    return (
+      <div className="post">
+        <span>{this.props.content}</span>
       </div>
     )
   }
