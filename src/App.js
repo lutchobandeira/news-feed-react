@@ -17,10 +17,7 @@ class Feed extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      posts: [
-        {category: categories[0], content: 'This is my first post!'},
-        {category: categories[1], content: 'This is my second post!'}
-      ],
+      posts: JSON.parse(localStorage.getItem('posts')) || [],
       filteredPosts: []
     }
 
@@ -29,9 +26,9 @@ class Feed extends Component {
   }
 
   handleNewPost(post) {
-    this.setState({
-      posts: this.state.posts.concat([post])
-    });
+    var posts = this.state.posts.concat([post]);
+    this.setState({posts: posts});
+    localStorage.setItem('posts', JSON.stringify(posts));
   }
 
   handleFilter(filter) {
