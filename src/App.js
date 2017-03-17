@@ -121,6 +121,9 @@ class Filter extends Component {
 
   handleChange(event) {
     this.setState({value: event.target.value});
+    if (event.target.value === '') {
+      this.props.onFilter('');
+    }
   }
 
   handleKeyUp(event) {
