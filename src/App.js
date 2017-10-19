@@ -19,7 +19,8 @@ class Feed extends Component {
     super(props);
     this.state = {
       posts: [],
-      filteredPosts: []
+      filteredPosts: [],
+      errors: {}
     }
 
     this.handleNewPost = this.handleNewPost.bind(this);
@@ -49,6 +50,12 @@ class Feed extends Component {
   }
 
   handleNewPost(post) {
+    const currentPosts = this.state.posts;
+    const context = this;
+
+    var posts = this.state.posts.concat([post]);
+    this.setState({ posts, errors: {} });
+
     fetch(`${apiUrl}/posts`, {
       method: 'post',
       body: JSON.stringify(post),
@@ -56,11 +63,17 @@ class Feed extends Component {
     }).then(function(response) {
       return response.json();
     }).then(function(data) {
-      console.log('server response', data);
+      if (data.errors) {
+        context.setState({
+          errors: data.errors,
+          posts: currentPosts
+        });
+      } else {
+        context.setState({
+          errors: {}
+        });
+      }
     });
-
-    var posts = this.state.posts.concat([post]);
-    this.setState({ posts });
   }
 
   handleFilter(filter) {
@@ -83,7 +96,7 @@ class Feed extends Component {
       <div className="feed">
         <Filter onFilter={this.handleFilter} />
         {filteredPosts.length > 0 ? filteredPosts : posts}
-        <PostForm onSubmit={this.handleNewPost} />
+        <PostForm onSubmit={this.handleNewPost} errors={this.state.errors} />
       </div>
     )
   }
@@ -117,11 +130,16 @@ class PostForm extends Component {
   }
 
   render() {
+    let errors = {};
+    Object.keys(this.props.errors).forEach((key) => {
+      errors[key] = this.props.errors[key] ? this.props.errors[key][0] : null;
+    });
     return (
       <div className="post-form">
         <form onSubmit={this.handleSubmit}>
           <label>
             Category:
+            <small className="error">{errors.category}</small>
             <select ref={(input) => this.category = input}>
               {categories.map((category, index) =>
                 <option key={category} value={category}>{category}</option>
@@ -130,6 +148,7 @@ class PostForm extends Component {
           </label>
           <label>
             Content:
+            <small className="error">{errors.content}</small>
             <input type="text" ref={(input) => this.content = input} />
           </label>
           <button className="button">Submit</button>
