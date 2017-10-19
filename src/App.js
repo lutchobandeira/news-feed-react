@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 
-const categories = ['World', 'Business', 'Tech', 'Sport'];
+const categories = ['world', 'business', 'tech', 'sport'];
+const apiUrl = 'http://localhost:3001'
 
 class App extends Component {
   render() {
@@ -17,7 +18,7 @@ class Feed extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      posts: JSON.parse(localStorage.getItem('posts')) || [],
+      posts: [],
       filteredPosts: []
     }
 
@@ -25,10 +26,41 @@ class Feed extends Component {
     this.handleFilter = this.handleFilter.bind(this);
   }
 
+  componentWillMount() {
+    this.fetchPosts();
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
+  }
+
+  startPolling() {
+    this.timeout = setTimeout(() => this.fetchPosts(), 10000);
+  }
+
+  fetchPosts() {
+    fetch(`${apiUrl}/posts`).then((response) => {
+      return response.json();
+    }).then((posts) => {
+      clearTimeout(this.timeout);
+      this.startPolling();
+      this.setState({ posts });
+    });
+  }
+
   handleNewPost(post) {
+    fetch(`${apiUrl}/posts`, {
+      method: 'post',
+      body: JSON.stringify(post),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      console.log('server response', data);
+    });
+
     var posts = this.state.posts.concat([post]);
-    this.setState({posts: posts});
-    localStorage.setItem('posts', JSON.stringify(posts));
+    this.setState({ posts });
   }
 
   handleFilter(filter) {
